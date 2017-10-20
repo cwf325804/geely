@@ -59,38 +59,38 @@ android {
         GuanWang {
         }
     }
-
-    applicationVariants.all { variant ->
-
-        def assembleVariant = tasks.findByName("assemble${variant.name.capitalize()}")
-        assembleVariant.doLast {
-            def zipalignVariant = tasks.findByName("zipalign${variant.name.capitalize()}")
-
-            def time = new Date().format("yyyy-MM-dd_HH:mm:ss", TimeZone.getDefault())
-            def saveDir = file("${variant.outputs[0].splitFolder.path}${File.separator}history${File.separator}${variant.versionCode}${File.separator}${variant.versionName}${File.separator}${variant.name.capitalize()}")
-            try {
-                copy {
-                    from zipalignVariant.outputs
-                    into saveDir
-                    rename { String fileName ->
-                        if (fileName.endsWith(".apk")) {
-                            return "ehuodi_Shipper_${variant.versionCode}_${variant.versionName}_${variant.name.capitalize()}.apk"
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            def proguardVariant = tasks.findByName("transformClassesAndResourcesWithProguardFor${variant.name.capitalize()}")
-            if(proguardVariant && proguardVariant.enabled) {
-                copy {
-                    from proguardVariant.outputs
-                    into saveDir
-                    include("*.txt")
-                }
-            }
-        }
-    }
+//
+//    applicationVariants.all { variant ->
+//
+//        def assembleVariant = tasks.findByName("assemble${variant.name.capitalize()}")
+//        assembleVariant.doLast {
+//            def zipalignVariant = tasks.findByName("zipalign${variant.name.capitalize()}")
+//
+//            def time = new Date().format("yyyy-MM-dd_HH:mm:ss", TimeZone.getDefault())
+//            def saveDir = file("${variant.outputs[0].splitFolder.path}${File.separator}history${File.separator}${variant.versionCode}${File.separator}${variant.versionName}${File.separator}${variant.name.capitalize()}")
+//            try {
+//                copy {
+//                    from zipalignVariant.outputs
+//                    into saveDir
+//                    rename { String fileName ->
+//                        if (fileName.endsWith(".apk")) {
+//                            return "ehuodi_Shipper_${variant.versionCode}_${variant.versionName}_${variant.name.capitalize()}.apk"
+//                        }
+//                    }
+//                }
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//            def proguardVariant = tasks.findByName("transformClassesAndResourcesWithProguardFor${variant.name.capitalize()}")
+//            if(proguardVariant && proguardVariant.enabled) {
+//                copy {
+//                    from proguardVariant.outputs
+//                    into saveDir
+//                    include("*.txt")
+//                }
+//            }
+//        }
+//    }
 }
 
 repositories {
