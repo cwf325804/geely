@@ -9,15 +9,96 @@ android {
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters 'armeabi'
+        }
+        resConfigs "zh"
+        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
+
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
+    // 移除lint检查的error
+    lintOptions {
+        abortOnError false
+    }
+    packagingOptions{
+        exclude'META-INF/DEPENDENCIES.txt'
+        exclude'META-INF/LICENSE.txt'
+        exclude'META-INF/NOTICE.txt'
+        exclude'META-INF/NOTICE'
+        exclude'META-INF/LICENSE'
+        exclude'META-INF/DEPENDENCIES'
+        exclude'META-INF/notice.txt'
+        exclude'META-INF/license.txt'
+        exclude'META-INF/dependencies.txt'
+        exclude'META-INF/LGPL2.1'
+    }
+
     buildTypes {
+        def versionSuffix = "." + new Date().format("MMddHHmm", TimeZone.getDefault());
+        debug{
+            applicationIdSuffix "test"
+            versionNameSuffix versionSuffix
+            debuggable true
+            shrinkResources true
+            minifyEnabled true
+        }
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            versionNameSuffix versionSuffix
+            debuggable false
+            shrinkResources true
+            minifyEnabled true
+        }
+    }
+
+    productFlavors {
+        GuanWang {
+        }
+    }
+
+    applicationVariants.all { variant ->
+
+        def assembleVariant = tasks.findByName("assemble${variant.name.capitalize()}")
+        assembleVariant.doLast {
+            def zipalignVariant = tasks.findByName("zipalign${variant.name.capitalize()}")
+
+            def time = new Date().format("yyyy-MM-dd_HH:mm:ss", TimeZone.getDefault())
+            def saveDir = file("${variant.outputs[0].splitFolder.path}${File.separator}history${File.separator}${variant.versionCode}${File.separator}${variant.versionName}${File.separator}${variant.name.capitalize()}")
+            try {
+                copy {
+                    from zipalignVariant.outputs
+                    into saveDir
+                    rename { String fileName ->
+                        if (fileName.endsWith(".apk")) {
+                            return "ehuodi_Shipper_${variant.versionCode}_${variant.versionName}_${variant.name.capitalize()}.apk"
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            def proguardVariant = tasks.findByName("transformClassesAndResourcesWithProguardFor${variant.name.capitalize()}")
+            if(proguardVariant && proguardVariant.enabled) {
+                copy {
+                    from proguardVariant.outputs
+                    into saveDir
+                    include("*.txt")
+                }
+            }
         }
     }
 }
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
+
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
