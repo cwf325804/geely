@@ -11,9 +11,9 @@ android {
         versionName "1.0"
         multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        ndk {
-            abiFilters 'armeabi'
-        }
+//        ndk {
+//            abiFilters 'armeabi'
+//        }
         resConfigs "zh"
         proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
