@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+import java.util.regex.Pattern
 
 android {
     compileSdkVersion 25
@@ -44,53 +45,74 @@ android {
             applicationIdSuffix "test"
             versionNameSuffix versionSuffix
             debuggable true
-            shrinkResources true
-            minifyEnabled true
+            shrinkResources false
+            minifyEnabled false
         }
         release {
             versionNameSuffix versionSuffix
             debuggable false
-            shrinkResources true
-            minifyEnabled true
+            shrinkResources false
+            minifyEnabled false
         }
     }
 
-    productFlavors {
-        GuanWang {
+/*    android.applicationVariants.all { variant ->
+        def manifestFile = file("AndroidManifest.xml")
+        def pattern = Pattern.compile("versionName=\"(.+)\"")
+        def manifestText = manifestFile.getText()
+        def matcher = pattern.matcher(manifestText)
+        matcher.find()
+        def versionName = matcher.group(1)
+        pattern = Pattern.compile("versionCode=\"(.+)\"")
+        matcher = pattern.matcher(manifestText)
+        matcher.find()
+        def versionCode = matcher.group(1)
+
+        if (variant.buildType.zipAlignEnabled) {
+            variant.outputs.each { output ->
+                def outputFile = output.outputFile
+                if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                    def fileName = "apk/" + applicationId + "-V" + versionName + "-" + versionCode + "-" + variant.name + "-" + buildTime() + ".apk"
+                    output.outputFile = new File(outputFile.parent, fileName)
+                }
+            }
+        } else {
+            variant.outputs.each { output ->
+                def outputFile = output.outputFile
+                if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                    def fileName = "apk/" + applicationId + "-V" + versionName + "-" + versionCode + "-" + variant.name + "-" + buildTime() + "-unaligned.apk"
+                    output.outputFile = new File(outputFile.parent, fileName)
+                }
+            }
+        }
+    }*/
+    android.applicationVariants.all { variant ->
+        def assembleTask = tasks.findByName("assemble${variant.name.capitalize()}")
+        assembleTask.doLast {
+            def packageTask = tasks.findByName("package${variant.name.capitalize()}")
+
+            //def time = new Date().format("yyyy-MM-dd_HH:mm:ss", TimeZone.getDefault())
+            def saveDir = file("${variant.outputs[0].splitFolder.path}${File.separator}history${File.separator}${variant.versionCode}${File.separator}${variant.versionName}${File.separator}${variant.name.capitalize()}")
+            copy {
+                from packageTask.outputFile
+                into saveDir
+                rename { String fileName ->
+                    if (fileName.endsWith(".apk")) {
+                        return "geely_${variant.versionCode}_${variant.versionName}_${variant.name.capitalize()}.apk"
+                    }
+                }
+            }
+            def proguardVariant = tasks.findByName("transformClassesAndResourcesWithProguardFor${variant.name.capitalize()}")
+            if (proguardVariant && proguardVariant.enabled) {
+                copy {
+                    from proguardVariant.outputs
+                    into saveDir
+                    include("*.txt")
+                }
+            }
         }
     }
-//
-//    applicationVariants.all { variant ->
-//
-//        def assembleVariant = tasks.findByName("assemble${variant.name.capitalize()}")
-//        assembleVariant.doLast {
-//            def zipalignVariant = tasks.findByName("zipalign${variant.name.capitalize()}")
-//
-//            def time = new Date().format("yyyy-MM-dd_HH:mm:ss", TimeZone.getDefault())
-//            def saveDir = file("${variant.outputs[0].splitFolder.path}${File.separator}history${File.separator}${variant.versionCode}${File.separator}${variant.versionName}${File.separator}${variant.name.capitalize()}")
-//            try {
-//                copy {
-//                    from zipalignVariant.outputs
-//                    into saveDir
-//                    rename { String fileName ->
-//                        if (fileName.endsWith(".apk")) {
-//                            return "ehuodi_Shipper_${variant.versionCode}_${variant.versionName}_${variant.name.capitalize()}.apk"
-//                        }
-//                    }
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//            def proguardVariant = tasks.findByName("transformClassesAndResourcesWithProguardFor${variant.name.capitalize()}")
-//            if(proguardVariant && proguardVariant.enabled) {
-//                copy {
-//                    from proguardVariant.outputs
-//                    into saveDir
-//                    include("*.txt")
-//                }
-//            }
-//        }
-//    }
+
 }
 
 repositories {
