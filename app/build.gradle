@@ -56,6 +56,7 @@ android {
         }
     }
 
+
 /*    android.applicationVariants.all { variant ->
         def manifestFile = file("AndroidManifest.xml")
         def pattern = Pattern.compile("versionName=\"(.+)\"")
