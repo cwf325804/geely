@@ -87,6 +87,15 @@ android {
             }
         }
     }*/
+    productFlavors {
+        commonsoon {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "commonsoon"]
+        }
+        zhushou91 {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "zhushou91"]
+        }
+    }
+
     android.applicationVariants.all { variant ->
         def assembleTask = tasks.findByName("assemble${variant.name.capitalize()}")
         assembleTask.doLast {

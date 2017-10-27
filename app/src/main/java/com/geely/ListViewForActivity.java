@@ -29,7 +29,6 @@ public class ListViewForActivity extends Activity {
         ArrayList<String> mDatas = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             mDatas.add("item  " + (i + 1));
-
         }
         NormalAdapter adapter = new NormalAdapter(this, mDatas);
         lv.setAdapter(adapter);
